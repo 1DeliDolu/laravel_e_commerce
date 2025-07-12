@@ -217,3 +217,47 @@ resources/views/admin/viewcategory.blade.php dosyasının içeriği:
     </table>
 @endsection
 ```
+
+---
+
+### Kategori Silme Özelliği
+
+#### 1. Controller Fonksiyonu
+
+AdminController.php dosyasına aşağıdaki fonksiyon eklenir:
+
+```php
+/* delete category */
+public function deleteCategory($id)
+{
+    $category = Category::findOrFail($id);
+    $category->delete();
+    return redirect()->back()->with('category_message', 'Category deleted successfully!');
+}
+```
+
+#### 2. View Dosyası Hata Mesajı
+
+viewcategory.blade.php dosyasına hata mesajı gösterimi eklenir:
+
+```blade
+{{-- delete --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+```
+
+#### 3. Route Tanımı
+
+web.php dosyasına aşağıdaki route eklenir:
+
+```php
+/* delete category */
+Route::delete('/delete_category/{id}', [AdminController::class, 'deleteCategory'])->name('deletecategory');
+```

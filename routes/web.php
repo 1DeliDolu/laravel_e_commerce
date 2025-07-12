@@ -23,6 +23,8 @@ Route::middleware('admin')->group(function () {
 
     Route::post('/add_category', [AdminController::class, 'postAddCategory'])->name('postaddcategory');
     Route::get('/view_category', [AdminController::class, 'viewCategory'])->name('viewcategory');
+    /* delete category */
+    Route::delete('/delete_category/{id}', [AdminController::class, 'deleteCategory'])->name('deletecategory');
 });
 
 require __DIR__ . '/auth.php';
