@@ -76,11 +76,13 @@
                                     <a class="btn btn-outline-secondary me-2" href="{{ url('/') }}">
                                         <i class="fas fa-home me-1"></i>Homepage
                                     </a>
-                                    <form class="d-inline" action="{{ route('customer.logout') }}" method="POST">
+                                    <a class="btn btn-danger" href="#"
+                                        onclick="event.preventDefault(); document.getElementById('customer-logout-form').submit();">
+                                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                    </a>
+                                    <form id="customer-logout-form" style="display: none;"
+                                        action="{{ route('customer.logout') }}" method="POST">
                                         @csrf
-                                        <button class="btn btn-danger" type="submit">
-                                            <i class="fas fa-sign-out-alt me-1"></i>Logout
-                                        </button>
                                     </form>
                                 </div>
                             </div>

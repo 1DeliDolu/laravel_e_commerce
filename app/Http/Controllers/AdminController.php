@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Customer;
 
 class AdminController extends Controller
 {
@@ -240,6 +241,25 @@ class AdminController extends Controller
         // For now, return a simple view or redirect
         // You can implement order functionality later
         return view('admin.view_order');
+    }
+
+    /**
+     * Admin dashboard
+     */
+    public function adminDashboard()
+    {
+        // Dashboard için gerekli verileri alabilirsiniz
+        $totalCustomers = \App\Models\Customer::count();
+        $totalProducts = \App\Models\Product::count();
+        $totalCategories = \App\Models\Category::count();
+        $totalOrders = 0; // Order model eklendiğinde güncellenir
+
+        return view('admin.admin_dashboard', compact(
+            'totalCustomers',
+            'totalProducts',
+            'totalCategories',
+            'totalOrders'
+        ));
     }
 
 }

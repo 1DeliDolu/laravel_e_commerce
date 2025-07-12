@@ -10,7 +10,14 @@ Route::get('/', function () {
     return view('index');
 })->name('index');
 
-Route::get('/dashboard', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+// CSRF Token refresh route
+Route::get('/csrf-token', function () {
+    return response()->json(['csrf_token' => csrf_token()]);
+});
+
+Route::get('/dashboard', function () {
+    return redirect()->route('admin.dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -20,6 +27,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('admin')->group(function () {
 
+    Route::get('/admin/dashboard', [AdminController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::get('/add_category', [AdminController::class, 'addCategory'])->name('add_category');
     Route::post('/add_category', [AdminController::class, 'postAddCategory'])->name('post_add_category');
     Route::get('/view_category', [AdminController::class, 'viewCategory'])->name('view_category');

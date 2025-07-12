@@ -74,32 +74,44 @@
                         </ul>
                         <div class="user_option">
                             @if (Auth::guard('customer')->check())
+                                <!-- Customer logged in -->
                                 <a class="btn nav_search-btn" href="{{ route('customer.dashboard') }}">
                                     <i class="fa fa-user" aria-hidden="true"></i>
-                                    <span>
-                                        My Account
-                                    </span>
+                                    <span>My Account</span>
                                 </a>
-                                <form style="display: inline;" action="{{ route('customer.logout') }}" method="POST">
+                                <a class="btn nav_search-btn" href="#"
+                                    onclick="event.preventDefault(); document.getElementById('customer-logout-form').submit();">
+                                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                                    <span>Logout</span>
+                                </a>
+                                <form id="customer-logout-form" style="display: none;"
+                                    action="{{ route('customer.logout') }}" method="POST">
                                     @csrf
-                                    <button class="btn nav_search-btn" type="submit"
-                                        style="background: none; border: none; color: inherit;">
-                                        <i class="fa fa-sign-out" aria-hidden="true"></i>
-                                        <span>Logout</span>
-                                    </button>
+                                </form>
+                            @elseif (Auth::check() && Auth::user()->user_type === 'admin')
+                                <!-- Admin logged in -->
+                                <a class="btn nav_search-btn" href="{{ route('admin.dashboard') }}">
+                                    <i class="fa fa-tachometer-alt" aria-hidden="true"></i>
+                                    <span>Admin Dashboard</span>
+                                </a>
+                                <a class="btn nav_search-btn" href="#"
+                                    onclick="event.preventDefault(); document.getElementById('admin-logout-form').submit();">
+                                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                                    <span>Logout</span>
+                                </a>
+                                <form id="admin-logout-form" style="display: none;" action="{{ route('logout') }}"
+                                    method="POST">
+                                    @csrf
                                 </form>
                             @else
+                                <!-- Not logged in -->
                                 <a class="btn nav_search-btn" href="{{ route('customer.login') }}">
                                     <i class="fa fa-user" aria-hidden="true"></i>
-                                    <span>
-                                        Login
-                                    </span>
+                                    <span>Login</span>
                                 </a>
                                 <a class="btn nav_search-btn" href="{{ route('customer.register') }}">
                                     <i class="fa fa-user-plus" aria-hidden="true"></i>
-                                    <span>
-                                        Register
-                                    </span>
+                                    <span>Register</span>
                                 </a>
                             @endif
                             <a href="">
