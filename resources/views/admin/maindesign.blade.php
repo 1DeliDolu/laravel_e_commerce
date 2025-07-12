@@ -9,19 +9,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="robots" content="all,follow">
         <!-- Bootstrap CSS-->
-        <link href="admin/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href="{{ asset('admin/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
         <!-- Font Awesome CSS-->
-        <link href="admin/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+        <link href="{{ asset('admin/vendor/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
         <!-- Custom Font Icons CSS-->
-        <link href="admin/css/font.css" rel="stylesheet">
+        <link href="{{ asset('admin/css/font.css') }}" rel="stylesheet">
         <!-- Google fonts - Muli-->
         <link href="https://fonts.googleapis.com/css?family=Muli:300,400,700" rel="stylesheet">
         <!-- theme stylesheet-->
-        <link id="theme-stylesheet" href="admin/css/style.default.css" rel="stylesheet">
+        <link id="theme-stylesheet" href="{{ asset('admin/css/style.default.css') }}" rel="stylesheet">
         <!-- Custom stylesheet - for your changes-->
-        <link href="admin/css/custom.css" rel="stylesheet">
+        <link href="{{ asset('admin/css/custom.css') }}" rel="stylesheet">
         <!-- Favicon-->
-        <link href="admin/img/favicon.ico" rel="shortcut icon">
+        <link href="{{ asset('admin/img/favicon.ico') }}" rel="shortcut icon">
         <!-- Tweaks for older IEs--><!--[if lt IE 9]>
         <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
         <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
@@ -116,7 +116,8 @@
             <nav id="sidebar">
                 <!-- Sidebar Header-->
                 <div class="sidebar-header d-flex align-items-center">
-                    <div class="avatar"><img class="img-fluid rounded-circle" src="img/avatar-6.jpg" alt="...">
+                    <div class="avatar"><img class="img-fluid rounded-circle"
+                            src="{{ asset('admin/img/avatar-6.jpg') }}" alt="...">
                     </div>
                     <div class="title">
                         <h1 class="h5">Admin</h1>
@@ -131,7 +132,7 @@
                                 class="icon-windows"></i>Category</a>
                         <ul class="list-unstyled collapse" id="exampledropdownDropdown">
                             <li><a href="{{ route('addcategory') }}">Add Category</a></li>
-                             <li><a href="{{ route('viewcategory') }}">View Category</a></li>
+                            <li><a href="{{ route('viewcategory') }}">View Category</a></li>
 
                         </ul>
                     </li>
@@ -158,8 +159,7 @@
                 @yield('dashboard')
                 @yield('add_category')
                 @yield('view_category')
-
-
+                @yield('update_category')
 
                 <footer class="footer">
                     <div class="footer__block no-margin-bottom block">
@@ -173,14 +173,14 @@
             </div>
         </div>
         <!-- JavaScript files-->
-        <script src="admin/vendor/jquery/jquery.min.js"></script>
-        <script src="admin/vendor/popper.js/umd/popper.min.js"></script>
-        <script src="admin/vendor/bootstrap/js/bootstrap.min.js"></script>
-        <script src="admin/vendor/jquery.cookie/jquery.cookie.js"></script>
-        <script src="admin/vendor/chart.js/Chart.min.js"></script>
-        <script src="admin/vendor/jquery-validation/jquery.validate.min.js"></script>
-        <script src="admin/js/charts-home.js"></script>
-        <script src="admin/js/front.js"></script>
+        <script src="{{ asset('admin/vendor/jquery/jquery.min.js') }}"></script>
+        <script src="{{ asset('admin/vendor/popper.js/umd/popper.min.js') }}"></script>
+        <script src="{{ asset('admin/vendor/bootstrap/js/bootstrap.min.js') }}"></script>
+        <script src="{{ asset('admin/vendor/jquery.cookie/jquery.cookie.js') }}"></script>
+        <script src="{{ asset('admin/vendor/chart.js/Chart.min.js') }}"></script>
+        <script src="{{ asset('admin/vendor/jquery-validation/jquery.validate.min.js') }}"></script>
+        <script src="{{ asset('admin/js/charts-home.js') }}"></script>
+        <script src="{{ asset('admin/js/front.js') }}"></script>
     </body>
 
 </html>
