@@ -16,9 +16,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 Route::middleware('admin')->group(function () {
 
-    Route::get('/test_admin', [AdminController::class, 'test_admin'])->name('test_admin');
+    Route::get('/add_category', [AdminController::class, 'addCategory'])->name('addcategory');
+
+    Route::post('/add_category', [AdminController::class, 'postAddCategory'])->name('postaddcategory');
 });
 
 require __DIR__ . '/auth.php';

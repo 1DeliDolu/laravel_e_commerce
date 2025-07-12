@@ -14,7 +14,7 @@ class AdminController extends Controller
    public function test_admin()
    {
        return view('admin.test_admin');
-   }        
+   }    
 }
 ```
 
@@ -70,6 +70,7 @@ Route::middleware('admin')->group(function () {
 ```
 
 Bu route, sadece admin yetkisine sahip kullanıcılar tarafından erişilebilir. test_admin fonksiyonu çağrılır ve admin paneli sayfası gösterilir.
+
 ### 6. Controller Oluşturma
 
 ```bash
@@ -115,6 +116,46 @@ Tüm migrationları geri alır. Veritabanını migration öncesi haline döndür
 ### 5. Migration'ı Baştan Uygulama
 
 ```bash
+php artisan migrate:fresh
+```
+
+Tüm tabloları silip migrationları baştan çalıştırır. Geliştirme aşamasında veritabanını temiz bir şekilde başlatmak için kullanılır.
+
+## 1. Controller Oluşturma
+
+```php
+php artisan make:controller AdminController
+```
+
+Bu komut, [**Controllers**](vscode-file://vscode-app/c:/Users/musta/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) klasöründe `AdminController.php` adında bir controller dosyası oluşturur. Controller'lar, gelen HTTP isteklerini karşılamak ve uygun yanıtları döndürmek için kullanılır.
+
+## 2. Middleware Oluşturma
+
+```php
+php artisan make:middleware AdminMiddleware
+```
+
+Bu komut, [**Middleware**](vscode-file://vscode-app/c:/Users/musta/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) klasöründe `AdminMiddleware.php` adında bir middleware dosyası oluşturur. Middleware'ler, HTTP isteklerini işlemek için kullanılır ve genellikle yetkilendirme gibi işlemleri gerçekleştirir
+
+## 3. Model ve Migration Oluşturma
+
+```php
+php artisan make:middleware AdminMiddleware
+```
+
+Bu komut, [**Models**](vscode-file://vscode-app/c:/Users/musta/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) klasöründe `Category.php` adında bir model dosyası ve [**migrations**](vscode-file://vscode-app/c:/Users/musta/AppData/Local/Programs/Microsoft%20VS%20Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) klasöründe bir migration dosyası oluşturur. Model, veritabanı tablolarını temsil ederken migration, tablo yapısını tanımlar.
+
+## 4. Migration'ı Çalıştırma
+
+```php
+php artisan migrate
+```
+
+Bu komut, tüm migration dosyalarını çalıştırarak veritabanı şemasını günceller. Yeni eklenen migration dosyası da bu komutla uygulanır.
+
+## 5. Migration'ı Baştan Uygulama
+
+```php
 php artisan migrate:fresh
 ```
 
