@@ -1,3 +1,75 @@
+## Admin Yetkilendirme ve Middleware Kullanımı
+
+### 1. AdminController Oluşturma
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class AdminController extends Controller
+{
+   public function test_admin()
+   {
+       return view('admin.test_admin');
+   }        
+}
+```
+
+Bu controller, admin paneline özel işlemleri yönetmek için kullanılır. test_admin fonksiyonu, admin/test_admin.blade.php view dosyasını döndürür.
+
+### 2. AdminMiddleware Oluşturma
+
+```php
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
+
+class AdminMiddleware
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (Auth::check() && Auth::user()->user_type === 'admin') {
+            return $next($request);
+        }
+        abort(401, 'Unauthorized action.');
+    }
+}
+```
+
+Bu middleware, kullanıcının admin olup olmadığını kontrol eder. Eğer kullanıcı admin değilse 401 hatası döner.
+
+### 3. Middleware Alias Tanımlama
+
+```php
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        ]);
+    })
+```
+
+Bu kod, AdminMiddleware'i 'admin' adıyla alias olarak tanımlar. Böylece route tanımlarında kolayca kullanılabilir.
+
+### 4. Admin View Dosyası
+
+`resources/views/admin/test_admin.blade.php`
+
+### 5. Route Tanımı
+
+```php
+Route::middleware('admin')->group(function () {
+    Route::get('/test_admin', [AdminController::class, 'test_admin'])->name('test_admin');
+});
+```
+
+Bu route, sadece admin yetkisine sahip kullanıcılar tarafından erişilebilir. test_admin fonksiyonu çağrılır ve admin paneli sayfası gösterilir.
 ### 6. Controller Oluşturma
 
 ```bash
