@@ -1,4 +1,4 @@
-@extends('admin.maindesign')
+@extends('admin.main_design')
 
 @section('update_category')
     @if (session('category_update'))

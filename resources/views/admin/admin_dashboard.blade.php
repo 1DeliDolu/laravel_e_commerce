@@ -1,4 +1,4 @@
-@extends('admin.maindesign')
+@extends('admin.main_design')
 
 @section('dashboard')
     <div class="container-fluid">

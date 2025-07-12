@@ -1,4 +1,4 @@
-@extends('admin.maindesign')
+@extends('admin.main_design')
 
 @section('view_category')
 
@@ -39,10 +39,10 @@
                             <td>
                                 <div class="d-flex justify-content-end align-items-center" style="gap: 10px;">
                                     <a class="btn btn-sm btn-primary"
-                                        href="{{ route('updatecategoryform', $category->id) }}">
+                                        href="{{ route('update_category_form', $category->id) }}">
                                         Update
                                     </a>
-                                    <form class="mb-0" action="{{ route('deletecategory', $category->id) }}"
+                                    <form class="mb-0" action="{{ route('delete_category', $category->id) }}"
                                         method="POST"
                                         onsubmit="return confirm('Are you sure you want to delete this category?');">
                                         @csrf

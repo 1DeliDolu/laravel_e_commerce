@@ -131,17 +131,17 @@
                     <li><a data-toggle="collapse" href="#exampledropdownDropdown" aria-expanded="false"> <i
                                 class="icon-windows"></i>Category</a>
                         <ul class="list-unstyled collapse" id="exampledropdownDropdown">
-                            <li><a href="{{ route('addcategory') }}">Add Category</a></li>
-                            <li><a href="{{ route('viewcategory') }}">View Category</a></li>
+                            <li><a href="{{ route('post_add_category') }}">Add Category</a></li>
+                            <li><a href="{{ route('view_category') }}">View Category</a></li>
 
                         </ul>
                     </li>
-                    <li><a data-toggle="collapse" href="#exampledropdownDropdown" aria-expanded="false"> <i
-                                class="icon-windows"></i>Example dropdown </a>
-                        <ul class="list-unstyled collapse" id="exampledropdownDropdown">
-                            <li><a href="#">Page</a></li>
-                            <li><a href="#">Page</a></li>
-                            <li><a href="#">Page</a></li>
+                    <li><a data-toggle="collapse" href="#productDropdown" aria-expanded="false"> <i
+                                class="icon-windows"></i>Product</a>
+                        <ul class="list-unstyled collapse" id="productDropdown">
+                            <li><a href="{{ route('add_product') }}">Add Product</a></li>
+                            <li><a href="{{ route('view_product') }}">View Product</a></li>
+                            <li><a href="{{ route('view_order') }}">View Order</a></li>
                         </ul>
                     </li>
 
@@ -160,6 +160,10 @@
                 @yield('add_category')
                 @yield('view_category')
                 @yield('update_category')
+                @yield('add_product')
+                @yield('view_product')
+                @yield('update_product')
+                @yield('view_order')
 
                 <footer class="footer">
                     <div class="footer__block no-margin-bottom block">

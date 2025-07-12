@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Product;
 
 class AdminController extends Controller
 {
     public function addCategory()
     {
-        return view('admin.addcategory'); // Assuming you have a view for adding categories
+        return view('admin.add_category'); // Assuming you have a view for adding categories
     }
     public function postAddCategory(Request $request)
     {
@@ -21,7 +22,7 @@ class AdminController extends Controller
     public function viewCategory()
     {
         $categories = Category::all();
-        return view('admin.viewcategory', compact('categories'));
+        return view('admin.view_category', compact('categories'));
     }
     /* delete category */
     public function deleteCategory($id)
@@ -43,13 +44,155 @@ class AdminController extends Controller
     public function updateCategoryForm($id)
     {
         $category = Category::findOrFail($id);
-        return view('admin.updatecategory', compact('category'));
+        return view('admin.update_category', compact('category'));
     }
     public function updateCategory(Request $request, $id)
     {
         $category = Category::findOrFail($id);
         $category->category = $request->input('category');
         $category->save();
-        return redirect()->route('viewcategory')->with('category_update', 'Category updated successfully!');
+        return redirect()->route('view_category')->with('category_update', 'Category updated successfully!');
     }
+
+    /* add product */
+    public function addProduct() {
+        $categories = Category::all(); // Tüm kategorileri al
+        return view('admin.add_product', compact('categories')); // View'e gönder
+    }
+
+    public function postAddProduct(Request $request) {
+        $request->validate([
+            'product_title' => 'required|string|max:255',
+            'product_description' => 'required|string',
+            'product_quantity' => 'required|integer|min:0',
+            'product_price' => 'required|numeric|min:0',
+            'product_category' => 'required|exists:categories,id',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            $product = new Product();
+            $product->product_title = $request->product_title;
+            $product->product_description = $request->product_description;
+            $product->product_quantity = $request->product_quantity;
+            $product->product_price = $request->product_price;
+            $product->product_category = $request->product_category;
+
+            // Handle multiple image uploads
+            $imagePaths = [];
+            if ($request->hasFile('product_images')) {
+                foreach ($request->file('product_images') as $image) {
+                    // Create directory if it doesn't exist
+                    $uploadPath = public_path('uploads/products');
+                    if (!file_exists($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+
+                    // Generate unique filename
+                    $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                    // Move image to public/uploads/products directory
+                    $image->move($uploadPath, $imageName);
+
+                    // Store relative path
+                    $imagePaths[] = 'uploads/products/' . $imageName;
+                }
+            }
+
+            // Store image paths as JSON, or empty array if no images
+            $product->product_images = json_encode($imagePaths);
+            $product->save();
+
+            return redirect()->back()->with('product_add', 'Ürün başarıyla eklendi!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('product_error', 'Ürün eklenirken hata oluştu: ' . $e->getMessage());
+        }
+    }
+
+    /* view product */
+    public function viewProduct()
+    {
+        $products = Product::with('category')->get();
+        return view('admin.view_product', compact('products'));
+    }
+
+    /* edit product */
+    public function editProduct($id)
+    {
+        $product = Product::findOrFail($id);
+        $categories = Category::all();
+        return view('admin.update_product', compact('product', 'categories'));
+    }
+
+    /* update product */
+    public function updateProduct(Request $request, $id)
+    {
+        $request->validate([
+            'product_title' => 'required|string|max:255',
+            'product_description' => 'required|string',
+            'product_quantity' => 'required|integer|min:0',
+            'product_price' => 'required|numeric|min:0',
+            'product_category' => 'required|exists:categories,id',
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            $product = Product::findOrFail($id);
+            $product->product_title = $request->product_title;
+            $product->product_description = $request->product_description;
+            $product->product_quantity = $request->product_quantity;
+            $product->product_price = $request->product_price;
+            $product->product_category = $request->product_category;
+
+            // Handle image uploads if new images are provided
+            if ($request->hasFile('product_images')) {
+                // Get existing images
+                $existingImages = json_decode($product->product_images, true) ?: [];
+
+                // Upload new images
+                $newImagePaths = [];
+                foreach ($request->file('product_images') as $image) {
+                    $uploadPath = public_path('uploads/products');
+                    if (!file_exists($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+
+                    $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                    $image->move($uploadPath, $imageName);
+                    $newImagePaths[] = 'uploads/products/' . $imageName;
+                }
+
+                // Merge existing and new images
+                $allImages = array_merge($existingImages, $newImagePaths);
+                $product->product_images = json_encode($allImages);
+            }
+
+            $product->save();
+
+            return redirect()->route('view_product')->with('product_update', 'Ürün başarıyla güncellendi!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('product_error', 'Ürün güncellenirken hata oluştu: ' . $e->getMessage());
+        }
+    }
+
+    /* delete product */
+    public function deleteProduct($id)
+    {
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
+            return redirect()->back()->with('product_delete', 'Product deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('product_error', 'Error deleting product: ' . $e->getMessage());
+        }
+    }
+
+    /* view order */
+    public function viewOrder()
+    {
+        // For now, return a simple view or redirect
+        // You can implement order functionality later
+        return view('admin.view_order');
+    }
+
 }
