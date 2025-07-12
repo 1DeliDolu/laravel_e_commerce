@@ -18,4 +18,9 @@ class AdminController extends Controller
         $category->save();
         return redirect()->back()->with('category_message', 'Category added successfully!');
     }
+    public function viewCategory()
+    {
+        $categories = Category::all();
+        return view('admin.viewcategory', compact('categories'));
+    }
 }

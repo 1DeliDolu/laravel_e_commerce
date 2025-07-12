@@ -14,7 +14,7 @@ class AdminController extends Controller
    public function test_admin()
    {
        return view('admin.test_admin');
-   }    
+   }
 }
 ```
 
@@ -160,3 +160,60 @@ php artisan migrate:fresh
 ```
 
 Tüm tabloları silip migrationları baştan çalıştırır. Geliştirme aşamasında veritabanını temiz bir şekilde başlatmak için kullanılır.
+
+---
+
+### Kategori Listeleme Özelliği
+
+#### 1. Controller Fonksiyonu
+
+AdminController.php dosyasına aşağıdaki fonksiyon eklenir:
+
+```php
+public function viewCategory()
+{
+    $categories = Category::all();
+    return view('admin.viewcategory', compact('categories'));
+}
+```
+
+#### 2. Route Tanımı
+
+web.php dosyasına aşağıdaki route eklenir:
+
+```php
+Route::get('/view_category', [AdminController::class, 'viewCategory'])->name('viewcategory');
+```
+
+#### 3. View Dosyası
+
+resources/views/admin/viewcategory.blade.php dosyasının içeriği:
+
+```blade
+@extends('admin.maindesign')
+
+@section('view_category')
+    <h1>View Categories</h1>
+    @if(session('category_message'))
+        <div class="alert alert-success">
+            {{ session('category_message') }}
+        </div>
+    @endif
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Category Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($categories as $category)
+                <tr>
+                    <td>{{ $category->id }}</td>
+                    <td>{{ $category->category }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+@endsection
+```

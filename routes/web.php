@@ -22,6 +22,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/add_category', [AdminController::class, 'addCategory'])->name('addcategory');
 
     Route::post('/add_category', [AdminController::class, 'postAddCategory'])->name('postaddcategory');
+    Route::get('/view_category', [AdminController::class, 'viewCategory'])->name('viewcategory');
 });
 
 require __DIR__ . '/auth.php';

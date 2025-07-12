@@ -131,6 +131,7 @@
                                 class="icon-windows"></i>Category</a>
                         <ul class="list-unstyled collapse" id="exampledropdownDropdown">
                             <li><a href="{{ route('addcategory') }}">Add Category</a></li>
+                             <li><a href="{{ route('viewcategory') }}">View Category</a></li>
 
                         </ul>
                     </li>
@@ -156,6 +157,7 @@
                 </section>
                 @yield('dashboard')
                 @yield('add_category')
+                @yield('view_category')
 
 
 
