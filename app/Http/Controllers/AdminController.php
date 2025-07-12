@@ -133,45 +133,73 @@ class AdminController extends Controller
             'product_quantity' => 'required|integer|min:0',
             'product_price' => 'required|numeric|min:0',
             'product_category' => 'required|exists:categories,id',
-            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'product_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'existing_images' => 'nullable|string'
         ]);
 
         try {
             $product = Product::findOrFail($id);
+
+            // Get original images before update
+            $originalImages = is_string($product->product_images)
+                ? json_decode($product->product_images, true) ?? []
+                : $product->product_images ?? [];
+
+            // Handle existing images from form
+            $existingImages = [];
+            if ($request->existing_images) {
+                $existingImages = json_decode($request->existing_images, true) ?: [];
+            }
+
+            // Find images that were removed (exist in original but not in existing)
+            $removedImages = array_diff($originalImages, $existingImages);
+
+            // Delete removed images from file system
+            if (!empty($removedImages)) {
+                foreach ($removedImages as $imagePath) {
+                    $fullPath = public_path($imagePath);
+                    if (file_exists($fullPath)) {
+                        unlink($fullPath); // Delete the physical file
+                    }
+                }
+            }
+
             $product->product_title = $request->product_title;
             $product->product_description = $request->product_description;
             $product->product_quantity = $request->product_quantity;
             $product->product_price = $request->product_price;
             $product->product_category = $request->product_category;
 
-            // Handle image uploads if new images are provided
+            // Handle new image uploads
+            $newImagePaths = [];
             if ($request->hasFile('product_images')) {
-                // Get existing images
-                $existingImages = json_decode($product->product_images, true) ?: [];
-
-                // Upload new images
-                $newImagePaths = [];
                 foreach ($request->file('product_images') as $image) {
+                    // Create directory if it doesn't exist
                     $uploadPath = public_path('uploads/products');
                     if (!file_exists($uploadPath)) {
                         mkdir($uploadPath, 0777, true);
                     }
 
+                    // Generate unique filename
                     $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+                    // Move image to public/uploads/products directory
                     $image->move($uploadPath, $imageName);
+
+                    // Store relative path
                     $newImagePaths[] = 'uploads/products/' . $imageName;
                 }
-
-                // Merge existing and new images
-                $allImages = array_merge($existingImages, $newImagePaths);
-                $product->product_images = json_encode($allImages);
             }
+
+            // Merge existing and new images
+            $allImages = array_merge($existingImages, $newImagePaths);
+            $product->product_images = json_encode($allImages);
 
             $product->save();
 
-            return redirect()->route('view_product')->with('product_update', 'Ürün başarıyla güncellendi!');
+            return redirect()->route('view_product')->with('product_update', 'Product updated successfully!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('product_error', 'Ürün güncellenirken hata oluştu: ' . $e->getMessage());
+            return redirect()->back()->with('product_error', 'Error updating product: ' . $e->getMessage());
         }
     }
 
@@ -180,8 +208,27 @@ class AdminController extends Controller
     {
         try {
             $product = Product::findOrFail($id);
+
+            // Delete associated images from storage
+            if ($product->product_images) {
+                $images = is_string($product->product_images)
+                    ? json_decode($product->product_images, true)
+                    : $product->product_images;
+
+                if (is_array($images) && !empty($images)) {
+                    foreach ($images as $imagePath) {
+                        $fullPath = public_path($imagePath);
+                        if (file_exists($fullPath)) {
+                            unlink($fullPath); // Delete the physical file
+                        }
+                    }
+                }
+            }
+
+            // Delete the product record
             $product->delete();
-            return redirect()->back()->with('product_delete', 'Product deleted successfully!');
+
+            return redirect()->back()->with('product_delete', 'Product and associated images deleted successfully!');
         } catch (\Exception $e) {
             return redirect()->back()->with('product_error', 'Error deleting product: ' . $e->getMessage());
         }

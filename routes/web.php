@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CustomerController;
 
 Route::get('/', function () {
     return view('index');
@@ -40,6 +41,35 @@ Route::middleware('admin')->group(function () {
     Route::delete('/delete_product/{id}', [AdminController::class, 'deleteProduct'])->name('delete_product');
     /* view order */
     Route::get('/view_order', [AdminController::class, 'viewOrder'])->name('view_order');
+});
+
+// Customer Routes
+Route::prefix('customer')->name('customer.')->group(function () {
+    // Guest routes (for non-authenticated customers)
+    Route::middleware('guest:customer')->group(function () {
+        Route::get('/register', [CustomerController::class, 'register'])->name('register');
+        Route::post('/register', [CustomerController::class, 'postRegister'])->name('post.register');
+        Route::get('/login', [CustomerController::class, 'login'])->name('login');
+        Route::post('/login', [CustomerController::class, 'postLogin'])->name('post.login');
+    });
+
+    // Authenticated customer routes
+    Route::middleware('auth:customer')->group(function () {
+        Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('dashboard');
+        Route::get('/edit', [CustomerController::class, 'edit'])->name('edit');
+        Route::put('/update', [CustomerController::class, 'update'])->name('update');
+        Route::post('/logout', [CustomerController::class, 'logout'])->name('logout');
+    });
+});
+
+// Redirect standard register to customer register
+Route::get('/register', function () {
+    return redirect()->route('customer.register');
+});
+
+// Also redirect standard login to customer login
+Route::get('/login', function () {
+    return redirect()->route('customer.login');
 });
 
 require __DIR__ . '/auth.php';
