@@ -52,7 +52,9 @@
                                         @foreach ($products as $product)
                                             <tr style="vertical-align: middle;">
                                                 <td class="fw-bold text-primary ps-4">{{ $product->id }}</td>
-                                                <td class="fw-semibold">{{ $product->product_title }}</td>
+                                                <td class="fw-semibold" title="{{ $product->product_title }}">
+                                                    {{ Str::limit($product->product_title, 20) }}
+                                                </td>
                                                 <td>
                                                     <div class="d-flex flex-wrap gap-1">
                                                         @php
@@ -90,7 +92,8 @@ if (is_string($images)) {
                                                         @endif
                                                     </div>
                                                 </td>
-                                                <td class="text-muted">{{ Str::limit($product->product_description, 50) }}
+                                                <td class="text-muted" title="{{ $product->product_description }}">
+                                                    {{ Str::limit($product->product_description, 100) }}
                                                 </td>
                                                 <td>
                                                     <span class="badge">{{ $product->product_quantity }} pcs</span>
