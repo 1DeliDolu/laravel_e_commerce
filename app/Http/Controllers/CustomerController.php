@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Customer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Customer;
 
 class CustomerController extends Controller
 {
@@ -14,7 +14,7 @@ class CustomerController extends Controller
      */
     public function register()
     {
-        return view('customers.register');
+        return view('customer.register');
     }
 
     /**
@@ -52,7 +52,7 @@ class CustomerController extends Controller
      */
     public function login()
     {
-        return view('customers.login');
+        return view('customer.login');
     }
 
     /**
@@ -80,7 +80,16 @@ class CustomerController extends Controller
     public function dashboard()
     {
         $customer = Auth::guard('customer')->user();
-        return view('customers.dashboard', compact('customer'));
+
+        // Check if customer has orders relationship, if not return empty collection
+        try {
+            $orders = $customer->orders()->with('orderItems.product')->orderBy('created_at', 'desc')->take(5)->get();
+        } catch (\Exception $e) {
+            // If orders relationship doesn't exist, create empty collection
+            $orders = collect();
+        }
+
+        return view('customer.dashboard', compact('customer', 'orders'));
     }
 
     /**
@@ -98,7 +107,7 @@ class CustomerController extends Controller
     public function edit()
     {
         $customer = Auth::guard('customer')->user();
-        return view('customers.update_customer', compact('customer'));
+        return view('customer.update_customer', compact('customer'));
     }
 
     /**

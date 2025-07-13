@@ -43,4 +43,28 @@ class Customer extends Authenticatable
             'total_spent' => 'decimal:2',
         ];
     }
+
+    /**
+     * Get the orders for the customer.
+     */
+    public function orders()
+    {
+        return $this->hasMany(\App\Models\Order::class);
+    }
+
+    /**
+     * Get the customer's full name.
+     */
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Get the customer's name (alias for full_name).
+     */
+    public function getNameAttribute()
+    {
+        return $this->getFullNameAttribute();
+    }
 }

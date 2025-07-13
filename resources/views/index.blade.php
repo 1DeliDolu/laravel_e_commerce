@@ -11,6 +11,7 @@
         <meta name="keywords" content="" />
         <meta name="description" content="" />
         <meta name="author" content="" />
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <link type="image/x-icon" href="front_end/images/favicon.png" rel="shortcut icon">
 
         <title>
@@ -29,6 +30,77 @@
         <link href="front_end/css/style.css" rel="stylesheet" />
         <!-- responsive style -->
         <link href="front_end/css/responsive.css" rel="stylesheet" />
+
+        <!-- Custom Product Hover Effects -->
+        <style>
+            .product-card {
+                transition: all 0.3s ease;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            }
+
+            .product-card .img-box {
+                overflow: hidden;
+            }
+
+            .product-card .img-box img {
+                transition: transform 0.3s ease;
+            }
+
+            .product-card:hover .img-box img {
+                transform: scale(1.05);
+            }
+
+            .product-card .detail-box {
+                transition: all 0.3s ease;
+            }
+
+            .product-card:hover .detail-box {
+                background: #f8f9fa;
+            }
+
+            .category-badge {
+                font-size: 0.75rem;
+                padding: 2px 8px;
+                border-radius: 10px;
+                margin-top: 5px;
+                display: inline-block;
+            }
+
+            .cart-container {
+                position: relative;
+                display: inline-block;
+                margin-right: 15px;
+            }
+
+            .cart-badge {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: #dc3545 !important;
+                color: white !important;
+                border-radius: 50%;
+                padding: 2px 6px;
+                font-size: 0.75rem;
+                font-weight: bold;
+                min-width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+            }
+
+            .cart-badge.show {
+                display: flex !important;
+            }
+        </style>
     </head>
 
     <body>
@@ -114,9 +186,13 @@
                                     <span>Register</span>
                                 </a>
                             @endif
-                            <a href="">
-                                <i class="fa fa-shopping-bag" aria-hidden="true"></i>
-                            </a>
+                            <div class="cart-container position-relative">
+                                <a id="cart-link" href="{{ route('cart.view') }}">
+                                    <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+                                    <span class="cart-badge bg-danger text-white" id="cart-count"
+                                        style="display: none;">0</span>
+                                </a>
+                            </div>
                             <form class="form-inline">
                                 <button class="btn nav_search-btn" type="submit">
                                     <i class="fa fa-search" aria-hidden="true"></i>
@@ -396,6 +472,104 @@
 
         <!-- end shop section -->
 
+        <!-- Dynamic Products Section from Database -->
+        <section class="product_section layout_padding">
+            <div class="container">
+                <div class="heading_container heading_center">
+                    <h2>
+                        Our <span>products</span>
+                    </h2>
+                </div>
+                <div class="row">
+                    @forelse($products as $product)
+                        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+                            <div class="box product-card"
+                                onclick="window.location.href='{{ route('product.detail', $product->id) }}'">
+                                <div class="option_container">
+                                    <div class="options">
+                                        <a class="option1" href="{{ route('product.detail', $product->id) }}">
+                                            View Details
+                                        </a>
+                                        <a class="option2" href="{{ route('product.detail', $product->id) }}">
+                                            Buy Now
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="img-box">
+                                    @php
+                                        $images = $product->product_images;
+                                        if (is_string($images)) {
+                                            $images = json_decode($images, true) ?? [];
+                                        }
+                                        if (!is_array($images)) {
+                                            $images = [];
+                                        }
+                                    @endphp
+
+                                    @if (!empty($images) && count($images) > 0)
+                                        <img src="{{ asset($images[0]) }}" alt="{{ $product->product_title }}"
+                                            style="height: 200px; object-fit: cover; width: 100%;" />
+                                    @else
+                                        <img src="front_end/images/p1.png" alt="{{ $product->product_title }}"
+                                            style="height: 200px; object-fit: cover; width: 100%;" />
+                                    @endif
+                                </div>
+                                <div class="detail-box">
+                                    <h5 style="height: 50px; overflow: hidden;">
+                                        {{ Str::limit($product->product_title, 40) }}
+                                    </h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="text-primary fw-bold">
+                                            ${{ number_format($product->product_price, 2) }}
+                                        </h6>
+                                        @if ($product->product_quantity > 0)
+                                            <small class="badge bg-success">Stock:
+                                                {{ $product->product_quantity }}</small>
+                                        @else
+                                            <small class="badge bg-danger">Out of Stock</small>
+                                        @endif
+                                    </div>
+                                    <small class="category-badge bg-warning text-dark">
+                                        <i class="fa fa-tag"></i> {{ $product->category->category ?? 'No Category' }}
+                                    </small>
+                                    <p class="mt-2" style="font-size: 0.85rem; height: 40px; overflow: hidden;">
+                                        {{ Str::limit($product->product_description, 80) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 py-5 text-center">
+                            <div class="no-products">
+                                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted">No Products Available</h4>
+                                <p class="text-muted">Admin can add products from the admin panel!</p>
+                                @if (Auth::check() && Auth::user()->user_type === 'admin')
+                                    <a class="btn btn-primary" href="{{ route('add_product') }}">
+                                        <i class="fas fa-plus me-1"></i>Add Products
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
+                @if ($products->count() > 0)
+                    <div class="btn-box">
+                        <a href="#" onclick="showAllProducts()">
+                            View All Products
+                        </a>
+                    </div>
+                @endif
+            </div>
+        </section>
+
+        <script>
+            function showAllProducts() {
+                // Future: Redirect to products page
+                alert('Products page will be implemented soon!');
+            }
+        </script>
+
         <!-- contact section -->
 
         <section class="contact_section">
@@ -543,6 +717,108 @@
         <script src="front_end/js/bootstrap.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
         <script src="front_end/js/custom.js"></script>
+
+        <!-- Cart Functionality Scripts -->
+        <script>
+            $(document).ready(function() {
+                // Set up CSRF token for AJAX requests
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                // Load cart count on page load
+                updateCartCount();
+            });
+
+            function updateCartCount() {
+                $.get('/cart/count', function(data) {
+                    if (data.count > 0) {
+                        $('#cart-count').text(data.count).show();
+                    } else {
+                        $('#cart-count').hide();
+                    }
+                }).fail(function() {
+                    console.error('Failed to load cart count');
+                });
+            }
+
+            function addToCart(productId, quantity = 1) {
+                // Show loading state
+                const originalText = event.target.innerHTML;
+                event.target.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Adding...';
+                event.target.disabled = true;
+
+                $.ajax({
+                    url: '/cart/add',
+                    method: 'POST',
+                    data: {
+                        product_id: productId,
+                        quantity: quantity
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            updateCartCount();
+                            showToast('Product added to cart!', 'success');
+                        } else {
+                            showToast(response.message, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        showToast(response.message || 'Error adding to cart!', 'error');
+                    },
+                    complete: function() {
+                        // Reset button state
+                        event.target.innerHTML = originalText;
+                        event.target.disabled = false;
+                    }
+                });
+            }
+
+            function showToast(message, type = 'info') {
+                // Create toast element
+                const toast = $(`
+                    <div class="toast-message toast-${type}" style="
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#6c757d'};
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 5px;
+                        z-index: 9999;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        opacity: 0;
+                        transform: translateX(100%);
+                        transition: all 0.3s ease;
+                    ">
+                        <i class="fa fa-${type === 'success' ? 'check' : type === 'error' ? 'times' : 'info'}-circle"></i>
+                        ${message}
+                    </div>
+                `);
+
+                $('body').append(toast);
+
+                // Animate in
+                setTimeout(() => {
+                    toast.css({
+                        opacity: 1,
+                        transform: 'translateX(0)'
+                    });
+                }, 100);
+
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    toast.css({
+                        opacity: 0,
+                        transform: 'translateX(100%)'
+                    });
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        </script>
 
     </body>
 
