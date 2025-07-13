@@ -161,7 +161,7 @@
                                     <p class="text-muted mb-0">
                                         Don't have an account?
                                         <a class="text-decoration-none fw-semibold text-primary"
-                                            href="{{ route('register') }}">
+                                            href="{{ route('customer.register') }}">
                                             Create one here
                                         </a>
                                     </p>

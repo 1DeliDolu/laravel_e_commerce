@@ -29,8 +29,10 @@ class CheckoutController extends Controller
         $customerId = Auth::guard('customer')->id();
         $sessionId = $this->getSessionId();
 
-        // Get cart items
-        $cartItems = Cart::with('product')
+        // Get cart items with eager loading for better performance
+        $cartItems = Cart::with(['product' => function($query) {
+            $query->select('id', 'product_title', 'product_price', 'product_quantity');
+        }])
             ->where(function($query) use ($customerId, $sessionId) {
                 if ($customerId) {
                     $query->where('customer_id', $customerId);
@@ -74,36 +76,44 @@ class CheckoutController extends Controller
                 'order_date' => Carbon::now()
             ]);
 
-            // Create order items and update product quantities
+            // Prepare batch updates for better performance
+            $orderItems = [];
+            $productUpdates = [];
+
             foreach ($cartItems as $cartItem) {
                 // Check stock availability
-                $product = Product::find($cartItem->product_id);
-                if ($product->product_quantity < $cartItem->quantity) {
-                    throw new \Exception("Insufficient stock for product: " . $product->product_title);
+                if ($cartItem->product->product_quantity < $cartItem->quantity) {
+                    throw new \Exception("Insufficient stock for product: " . $cartItem->product->product_title);
                 }
 
-                // Create order item
-                OrderItem::create([
+                // Prepare order item data
+                $orderItems[] = [
                     'order_id' => $order->id,
                     'product_id' => $cartItem->product_id,
                     'product_title' => $cartItem->product->product_title,
                     'product_price' => $cartItem->price,
                     'quantity' => $cartItem->quantity,
-                    'total' => $cartItem->quantity * $cartItem->price
-                ]);
+                    'total' => $cartItem->quantity * $cartItem->price,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
 
-                // Update product quantity
-                $product->decrement('product_quantity', $cartItem->quantity);
+                // Prepare product quantity updates
+                $productUpdates[$cartItem->product_id] = $cartItem->quantity;
+            }
+
+            // Batch insert order items for better performance
+            OrderItem::insert($orderItems);
+
+            // Batch update product quantities
+            foreach ($productUpdates as $productId => $quantityToDeduct) {
+                Product::where('id', $productId)->decrement('product_quantity', $quantityToDeduct);
             }
 
             // Clear cart
-            Cart::where(function($query) use ($customerId, $sessionId) {
-                if ($customerId) {
-                    $query->where('customer_id', $customerId);
-                } else {
-                    $query->where('session_id', $sessionId);
-                }
-            })->delete();
+            $cartItems->each(function($item) {
+                $item->delete();
+            });
 
             DB::commit();
 
@@ -121,17 +131,23 @@ class CheckoutController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
+    }    /**
      * Generate and download PDF receipt
      */
     public function downloadReceipt($orderId)
     {
-        $order = Order::with('orderItems.product')->findOrFail($orderId);
+        $order = Order::with(['orderItems' => function($query) {
+            $query->select('id', 'order_id', 'product_title', 'product_price', 'quantity', 'total');
+        }])->findOrFail($orderId);
 
-        // Generate PDF
-        $pdf = Pdf::loadView('checkout.receipt', compact('order'));
+        // Simple PDF generation for faster performance
+        $pdf = Pdf::loadView('checkout.receipt', compact('order'))
+            ->setPaper('A4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true,
+                'defaultFont' => 'Arial'
+            ]);
 
         $filename = 'receipt-' . $order->order_number . '.pdf';
 

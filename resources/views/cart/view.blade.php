@@ -511,13 +511,13 @@
 
             function submitOrder() {
                 const form = document.getElementById('checkoutForm');
-                
+
                 // Form validation
                 if (!form.checkValidity()) {
                     form.reportValidity();
                     return;
                 }
-                
+
                 const formData = new FormData(form);
 
                 // Show loading state
@@ -529,7 +529,7 @@
                 // Immediately hide modal and show processing message
                 var checkoutModal = bootstrap.Modal.getInstance(document.getElementById('checkoutModal'));
                 checkoutModal.hide();
-                
+
                 showToast('Processing your order...', 'info');
 
                 $.ajax({
@@ -549,18 +549,18 @@
 
                             // Generate PDF immediately
                             const receiptUrl = '/checkout/receipt/' + response.order_id;
-                            
+
                             // Create download link and trigger automatic download
                             const downloadLink = document.createElement('a');
                             downloadLink.href = receiptUrl;
                             downloadLink.download = 'receipt-' + response.order_number + '.pdf';
                             downloadLink.style.display = 'none';
                             document.body.appendChild(downloadLink);
-                            
+
                             // Trigger download
                             downloadLink.click();
                             document.body.removeChild(downloadLink);
-                            
+
                             // Also open in new window for printing
                             setTimeout(function() {
                                 const printWindow = window.open(receiptUrl, '_blank');
@@ -588,7 +588,7 @@
                     error: function(xhr) {
                         const response = xhr.responseJSON;
                         showToast(response.message || 'Order processing failed. Please try again.', 'error');
-                        
+
                         // Re-open modal on error
                         setTimeout(function() {
                             checkoutModal.show();
